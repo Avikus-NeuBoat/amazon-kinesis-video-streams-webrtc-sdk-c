@@ -1,0 +1,12 @@
+prefix="/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source"
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libwebsockets_static
+Description: Websockets server and client static library
+Version: 4.3.5-v4.3.5
+
+Libs: -L${libdir} -l:libwebsockets.a
+Libs.private:
+Cflags: -I${includedir}

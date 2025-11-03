@@ -1,0 +1,12 @@
+prefix=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source
+exec_prefix=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source
+libdir=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source/lib
+includedir=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source/include
+
+Name: usrsctp
+Description: SCTP implementation
+URL: https://github.com/sctplab/usrsctp
+Version: 0.9.5.0
+Requires: 
+Libs: -L${libdir} -lusrsctp
+Cflags: -I${includedir} 

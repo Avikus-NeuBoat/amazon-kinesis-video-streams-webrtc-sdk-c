@@ -218,14 +218,12 @@ PVOID sendGstreamerAudioVideo(PVOID args)
                     break;
                 }
                 case RTSP_SOURCE: {
-                    UINT16 stringOutcome =
-                        SNPRINTF(rtspPipeLineBuffer, RTSP_PIPELINE_MAX_CHAR_COUNT,
-                                 "uridecodebin uri=%s ! "
-                                 "videoconvert ! "
-                                 "x264enc name=sampleVideoEncoder bframes=0 speed-preset=veryfast bitrate=512 byte-stream=TRUE tune=zerolatency ! "
-                                 "video/x-h264,stream-format=byte-stream,alignment=au,profile=baseline ! queue ! "
-                                 "appsink sync=TRUE emit-signals=TRUE name=appsink-video ",
-                                 pSampleConfiguration->rtspUri);
+                    UINT16 stringOutcome = SNPRINTF(rtspPipeLineBuffer, RTSP_PIPELINE_MAX_CHAR_COUNT,
+                                                    "rtspsrc location=%s latency=0 ! "
+                                                    "rtph264depay ! h264parse config-interval=1 ! "
+                                                    "video/x-h264,stream-format=byte-stream,alignment=au ! "
+                                                    "queue ! appsink sync=TRUE emit-signals=TRUE name=appsink-video",
+                                                    pSampleConfiguration->rtspUri);
 
                     if (stringOutcome > RTSP_PIPELINE_MAX_CHAR_COUNT) {
                         DLOGE("[KVS GStreamer Master] ERROR: rtsp uri entered exceeds maximum allowed length set by RTSP_PIPELINE_MAX_CHAR_COUNT");
@@ -361,7 +359,8 @@ INT32 main(INT32 argc, CHAR* argv[])
     RTC_CODEC videoCodec = RTC_CODEC_H264_PROFILE_42E01F_LEVEL_ASYMMETRY_ALLOWED_PACKETIZATION_MODE;
 
     SET_INSTRUMENTED_ALLOCATORS();
-    UINT32 logLevel = setLogLevel();
+    // UINT32 logLevel = setLogLevel();
+    UINT32 logLevel = 7; // set silence
 
     signal(SIGINT, sigintHandler);
 
@@ -387,7 +386,6 @@ INT32 main(INT32 argc, CHAR* argv[])
             }
         }
     }
-
     pSampleConfiguration->videoSource = sendGstreamerAudioVideo;
     pSampleConfiguration->mediaType = SAMPLE_STREAMING_VIDEO_ONLY;
     pSampleConfiguration->audioCodec = audioCodec;
@@ -437,6 +435,7 @@ INT32 main(INT32 argc, CHAR* argv[])
             } else {
                 pSampleConfiguration->srcType = RTSP_SOURCE;
                 pSampleConfiguration->rtspUri = argv[4];
+                // printf("rtsp address: %s\n", pSampleConfiguration->rtspUri);
             }
         } else {
             DLOGI("[KVS Gstreamer Master] Unrecognized source type. Defaulting to device source in GStreamer");
@@ -481,9 +480,9 @@ CleanUp:
             THREAD_JOIN(pSampleConfiguration->mediaSenderTid, NULL);
         }
 
-        if (pSampleConfiguration->enableFileLogging) {
-            freeFileLogger();
-        }
+        // if (pSampleConfiguration->enableFileLogging) {
+        //     freeFileLogger();
+        // }
         retStatus = freeSignalingClient(&pSampleConfiguration->signalingClientHandle);
         if (retStatus != STATUS_SUCCESS) {
             DLOGE("[KVS GStreamer Master] freeSignalingClient(): operation returned status code: 0x%08x", retStatus);

@@ -1,0 +1,11 @@
+prefix=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source
+exec_prefix=/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libsrtp2
+Version: 2.4.0-pre
+Description: Library for SRTP (Secure Realtime Transport Protocol)
+
+Libs: -L${libdir} -lsrtp2 -L/root/amazon-kinesis-video-streams-webrtc-sdk-c/open-source/lib -lcrypto -ldl -pthread 
+Cflags: -I${includedir}
