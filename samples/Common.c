@@ -833,7 +833,7 @@ STATUS createSampleConfiguration(PCHAR channelName, SIGNALING_CHANNEL_ROLE_TYPE 
         if (retStatus != STATUS_SUCCESS) {
             DLOGW("[KVS Master] createFileLogger(): operation returned status code: 0x%08x", retStatus);
         } else {
-            pSampleConfiguration->enableFileLogging = TRUE;
+            pSampleConfiguration->enableFileLogging = FALSE;
         }
     } else {
         retStatus = createFileLoggerWithLevelFiltering(FILE_LOGGING_BUFFER_SIZE, MAX_NUMBER_OF_LOG_FILES, (PCHAR) FILE_LOGGER_LOG_FILE_DIRECTORY_PATH,
@@ -842,7 +842,7 @@ STATUS createSampleConfiguration(PCHAR channelName, SIGNALING_CHANNEL_ROLE_TYPE 
         if (retStatus != STATUS_SUCCESS) {
             DLOGW("[KVS Master] createFileLogger(): operation returned status code: 0x%08x", retStatus);
         } else {
-            pSampleConfiguration->enableFileLogging = TRUE;
+            pSampleConfiguration->enableFileLogging = FALSE;
         }
     }
 
