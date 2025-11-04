@@ -1,4 +1,5 @@
 #include "Samples.h"
+#include "ami.h"
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
@@ -201,6 +202,53 @@ CleanUp:
     return (PVOID) (ULONG_PTR) retStatus;
 }
 
+char g_device_sn[INI_STRING_LEN];
+
+int get_sn_from_shm_cfg(const char *p_sn, int sn_buf_sz)
+{
+	// 0. check args
+	if (p_sn == NULL) { return -1; }
+	if (sn_buf_sz < INI_STRING_LEN) { return -2; }
+
+	// 
+	int shmidx  = 0;
+	int shmflag = 0;
+	int shmid   = 0;
+	void *shm=NULL;
+
+	T_SHM__CFG *pSHM_CFG=NULL;
+
+	// 1. attach SHM_CFG
+	shmidx  = AMI_SHM_IDX__CFG;
+	shmflag = 0444;
+	shmid   = shmget(SHM_KEY__CFG, SHM_SZ__CFG, shmflag);
+	if (shmid < 0)
+	{
+		PR("[XXX] shmget(%d,%08x,%lu,%0o) fail. err=%d\n", 
+				AMI_SHM_IDX__CFG, SHM_KEY__CFG, SHM_SZ__CFG, shmflag, errno);
+		return -11;
+	}
+
+	shm = (void *)shmat(shmid, (void *)0, 0);
+	if (shm == (void *)-1)
+	{
+		PR("[XXX] shmat(%d,%08x,%lu) fail. err=%d\n",
+				shmidx, SHM_KEY__CFG, SHM_SZ__CFG, errno);
+		return -12;
+	}
+
+	// 2. copy device_sn to 'p_sn'
+	pSHM_CFG = (T_SHM__CFG *)shm;
+
+	(void)memcpy(g_device_sn, pSHM_CFG->por_cfg.device_sn, INI_STRING_LEN);
+
+	(void)memset(p_sn, 0, sn_buf_sz);
+	(void)memcpy(p_sn, pSHM_CFG->por_cfg.device_sn, INI_STRING_LEN);
+
+	// n.
+	return 0;
+}
+
 INT32 main(INT32 argc, CHAR* argv[])
 {
     STATUS retStatus = STATUS_SUCCESS;
@@ -213,6 +261,14 @@ INT32 main(INT32 argc, CHAR* argv[])
     UINT32 logLevel = 7; // set silence
 
     signal(SIGINT, sigintHandler);
+
+    /* Get SN of ORU */
+    char device_sn[INI_STRING_LEN];
+    get_sn_from_shm_cfg(device_sn, INI_STRING_LEN);
+    printf("SN %s\n",device_sn);
+    /* Get SN of ORU */
+    /* Convert to encrypted password */
+    /* Convert to encrypted password */
 
     pChannelName = argv[1];
 

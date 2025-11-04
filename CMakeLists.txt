@@ -54,7 +54,12 @@ target_link_libraries(kvs_service
     crypto
     pthread
     m
+    ami
     ${GST_LIBRARIES}
+)
+
+target_include_directories(kvs_service
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../amu/inc
 )
 
 # === RPATH setting ===
