@@ -254,7 +254,8 @@ void encrypt_serial(const char *serial, char *channel_name) {
     const uint64_t prime = 1099511628211ULL;
 
     // FNV-1a hash
-    for (size_t i = 0; i < strlen(serial); i++) {
+    for (size_t i = 0; i < strlen(serial); i++)
+    {
         hash ^= (unsigned char)serial[i];
         hash *= prime;
     }
@@ -263,7 +264,8 @@ void encrypt_serial(const char *serial, char *channel_name) {
     size_t charset_len = sizeof(charset) - 1;
 
     // Generate 8 characters from hash
-    for (int i = 0; i < 14; i++) {
+    for (int i = 0; i < 14; i++)
+    {
         channel_name[i] = charset[hash % charset_len];
         hash /= charset_len;
     }
@@ -292,13 +294,12 @@ INT32 main(INT32 argc, CHAR* argv[])
     char channel_name_org[64] = "coras-cctv";
     char channel_name[64] = {0};
     encrypt_serial(device_sn,channel_name);
-    printf("Channel name %s\n",channel_name);
+    printf("Channel name %s\n",channel_name); // this should be the channel name
     /* Convert to encrypted password */
     /* Apply channel name automatically */
     pChannelName = (char*)malloc(strlen(channel_name_org) + 1);
     strcpy(pChannelName, channel_name_org);// should be changed encrypted one
     /* Apply channel name automatically */
-
 
     CHK_STATUS(createSampleConfiguration(pChannelName, SIGNALING_CHANNEL_ROLE_TYPE_MASTER, TRUE, TRUE, logLevel, &pSampleConfiguration));
 
@@ -315,18 +316,18 @@ INT32 main(INT32 argc, CHAR* argv[])
 
     /* Initialize GStreamer */
     gst_init(&argc, &argv);
-    DLOGI("[KVS Gstreamer Master] Finished initializing GStreamer and handlers");
+    // DLOGI("[KVS Gstreamer Master] Finished initializing GStreamer and handlers");
 
     // Initalize KVS WebRTC. This must be done before anything else, and must only be done once.
     CHK_STATUS(initKvsWebRtc());
-    DLOGI("[KVS GStreamer Master] KVS WebRTC initialization completed successfully");
+    // DLOGI("[KVS GStreamer Master] KVS WebRTC initialization completed successfully");
 
     CHK_STATUS(initSignaling(pSampleConfiguration, SAMPLE_MASTER_CLIENT_ID));
-    DLOGI("[KVS GStreamer Master] Channel %s set up done ", pChannelName);
+    // DLOGI("[KVS GStreamer Master] Channel %s set up done ", pChannelName);
 
     // Checking for termination
     CHK_STATUS(sessionCleanupWait(pSampleConfiguration));
-    DLOGI("[KVS GStreamer Master] Streaming session terminated");
+    // DLOGI("[KVS GStreamer Master] Streaming session terminated");
 
     // Clean termination -- develop
     // uint32_t i = 0;
@@ -342,7 +343,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     // }
     
     free(pChannelName);
-    // free(pSampleConfiguration->rtspUri);
+    free(pSampleConfiguration->rtspUri);
     // ATOMIC_STORE_BOOL(&pSampleConfiguration->appTerminateFlag, TRUE);
     // goto CleanUp;
 

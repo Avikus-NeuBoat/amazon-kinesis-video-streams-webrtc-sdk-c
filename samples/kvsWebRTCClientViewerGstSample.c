@@ -46,7 +46,8 @@ INT32 main(INT32 argc, CHAR* argv[])
     CHAR clientId[256];
 
     SET_INSTRUMENTED_ALLOCATORS();
-    UINT32 logLevel = setLogLevel();
+    // UINT32 logLevel = setLogLevel();
+    UINT32 logLevel = 7;
 
 #ifndef _WIN32
     signal(SIGINT, sigintHandler);

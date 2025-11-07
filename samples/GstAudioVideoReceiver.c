@@ -122,7 +122,7 @@ PVOID receiveGstreamerAudioVideo(PVOID args)
     // change caps and properties dynamically, more complex logic may be needed to support the same.
     switch (pSampleStreamingSession->pVideoRtcRtpTransceiver->receiver.track.codec) {
         case RTC_CODEC_H264_PROFILE_42E01F_LEVEL_ASYMMETRY_ALLOWED_PACKETIZATION_MODE:
-            videoDescription = "appsrc name=appsrc-video ! queue ! h264parse ! queue ! matroskamux name=mux ! queue ! filesink location=video.mkv";
+            videoDescription = "appsrc name=appsrc-video ! queue ! h264parse ! queue ! avdec_h264 ! queue ! videoconvert ! autovidesink sync=false";
             videocaps = gst_caps_new_simple("video/x-h264", "stream-format", G_TYPE_STRING, "byte-stream", "alignment", G_TYPE_STRING, "au",
                                             "profile", G_TYPE_STRING, "baseline", "height", G_TYPE_INT, DEFAULT_VIDEO_HEIGHT_PIXELS, "width",
                                             G_TYPE_INT, DEFAULT_VIDEO_WIDTH_PIXELS, NULL);
