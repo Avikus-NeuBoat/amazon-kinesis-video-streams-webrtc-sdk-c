@@ -268,14 +268,14 @@ INT32 main(INT32 argc, CHAR* argv[])
     printf("SN %s\n",device_sn);
     /* Get SN of ORU */
     /* Convert to encrypted password */
+    char channel_name[64] = "coras-cctv";
     /* Convert to encrypted password */
-    pChannelName = argv[1];
-    // char* channel_name = 'coras-cctv';
-    // pChannelName = 'channel_name';
     /* Apply channel name automatically */
-    // pChannelName = device_sn;
-    // printf("Channel name %s\n", pChannelName);
-    // goto CleanUp;
+    // pChannelName = argv[1];
+    pChannelName = (char*)malloc(strlen(channel_name) + 1);
+    strcpy(pChannelName, channel_name);// should be changed encrypted one
+    /* Apply channel name automatically */
+
 
     CHK_STATUS(createSampleConfiguration(pChannelName, SIGNALING_CHANNEL_ROLE_TYPE_MASTER, TRUE, TRUE, logLevel, &pSampleConfiguration));
 
@@ -318,6 +318,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     //     }
     // }
     
+    free(pChannelName);
     // free(pSampleConfiguration->rtspUri);
     // ATOMIC_STORE_BOOL(&pSampleConfiguration->appTerminateFlag, TRUE);
     // goto CleanUp;
