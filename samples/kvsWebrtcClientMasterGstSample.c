@@ -269,8 +269,13 @@ INT32 main(INT32 argc, CHAR* argv[])
     /* Get SN of ORU */
     /* Convert to encrypted password */
     /* Convert to encrypted password */
-
     pChannelName = argv[1];
+    // char* channel_name = 'coras-cctv';
+    // pChannelName = 'channel_name';
+    /* Apply channel name automatically */
+    // pChannelName = device_sn;
+    // printf("Channel name %s\n", pChannelName);
+    // goto CleanUp;
 
     CHK_STATUS(createSampleConfiguration(pChannelName, SIGNALING_CHANNEL_ROLE_TYPE_MASTER, TRUE, TRUE, logLevel, &pSampleConfiguration));
 
