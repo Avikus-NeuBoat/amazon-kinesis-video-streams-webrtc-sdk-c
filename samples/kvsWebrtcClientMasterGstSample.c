@@ -249,6 +249,27 @@ int get_sn_from_shm_cfg(const char *p_sn, int sn_buf_sz)
 	return 0;
 }
 
+void encrypt_serial(const char *serial, char *channel_name) {
+    uint64_t hash = 1469598103934665603ULL;  // FNV-1a 64-bit offset basis
+    const uint64_t prime = 1099511628211ULL;
+
+    // FNV-1a hash
+    for (size_t i = 0; i < strlen(serial); i++) {
+        hash ^= (unsigned char)serial[i];
+        hash *= prime;
+    }
+
+    const char charset[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    size_t charset_len = sizeof(charset) - 1;
+
+    // Generate 8 characters from hash
+    for (int i = 0; i < 14; i++) {
+        channel_name[i] = charset[hash % charset_len];
+        hash /= charset_len;
+    }
+    channel_name[14] = '\0';
+}
+
 INT32 main(INT32 argc, CHAR* argv[])
 {
     STATUS retStatus = STATUS_SUCCESS;
@@ -268,12 +289,14 @@ INT32 main(INT32 argc, CHAR* argv[])
     printf("SN %s\n",device_sn);
     /* Get SN of ORU */
     /* Convert to encrypted password */
-    char channel_name[64] = "coras-cctv";
+    char channel_name_org[64] = "coras-cctv";
+    char channel_name[64] = {0};
+    encrypt_serial(device_sn,channel_name);
+    printf("Channel name %s\n",channel_name);
     /* Convert to encrypted password */
     /* Apply channel name automatically */
-    // pChannelName = argv[1];
-    pChannelName = (char*)malloc(strlen(channel_name) + 1);
-    strcpy(pChannelName, channel_name);// should be changed encrypted one
+    pChannelName = (char*)malloc(strlen(channel_name_org) + 1);
+    strcpy(pChannelName, channel_name_org);// should be changed encrypted one
     /* Apply channel name automatically */
 
 
