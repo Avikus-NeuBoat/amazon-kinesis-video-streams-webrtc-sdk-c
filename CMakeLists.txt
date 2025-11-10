@@ -79,6 +79,7 @@ install(TARGETS ${PROJECT_NAME}
 file(GLOB KVS_SO_FILES
     "${KVS_SDK_ROOT}/lib/libkvs*.so*"
     "${KVS_SDK_ROOT}/open-source/lib/libkvs*.so*"
+    "${KVS_SDK_ROOT}/lib/libwebsockets*"
 )
 
 install(FILES ${KVS_SO_FILES}
