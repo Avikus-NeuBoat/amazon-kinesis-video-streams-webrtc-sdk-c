@@ -3,6 +3,8 @@
 #include <gst/gst.h>
 #include <gst/app/gstappsink.h>
 
+#define env_path "/root/copilot/cfg/.aws_kvs_env"
+
 extern PSampleConfiguration gSampleConfiguration;
 
 GstElement* senderPipeline = NULL;
@@ -272,8 +274,52 @@ void encrypt_serial(const char *serial, char *channel_name) {
     channel_name[14] = '\0';
 }
 
+void load_env_file(const char *path)
+{
+    FILE *fp = fopen(path, "r");
+    if (!fp)
+    {
+        perror("Failed to open .env file");
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), fp))
+    {
+        // Skip comments and empty lines
+        if (line[0] == '#' || line[0] == '\n') 
+        {
+            continue;
+        }
+
+        // Remove trailing newline
+        line[strcspn(line, "\n")] = 0;
+
+        // Split key=value
+        char *eq = strchr(line, '=');
+        if (!eq) continue;
+
+        *eq = 0;
+        char *key = line;
+        char *value = eq + 1;
+
+        // Optional: remove surrounding quotes
+        if (*value == '\'' || *value == '"') {
+            value++;
+            value[strlen(value) - 1] = '\0';
+        }
+
+        // Export it to environment
+        setenv(key, value, 1);
+    }
+
+    fclose(fp);
+}
+
 INT32 main(INT32 argc, CHAR* argv[])
 {
+    load_env_file(env_path);
+
     STATUS retStatus = STATUS_SUCCESS;
     PSampleConfiguration pSampleConfiguration = NULL;
     PCHAR pChannelName;
@@ -288,13 +334,13 @@ INT32 main(INT32 argc, CHAR* argv[])
     /* Get SN of ORU */
     char device_sn[INI_STRING_LEN];
     get_sn_from_shm_cfg(device_sn, INI_STRING_LEN);
-    printf("SN %s\n",device_sn);
+    // printf("SN %s\n",device_sn);
     /* Get SN of ORU */
     /* Convert to encrypted password */
     char channel_name_org[64] = "coras-cctv";
     char channel_name[64] = {0};
     encrypt_serial(device_sn,channel_name);
-    printf("Channel name %s\n",channel_name); // this should be the channel name
+    // printf("Channel name %s\n",channel_name); // this should be the channel name
     /* Convert to encrypted password */
     /* Apply channel name automatically */
     pChannelName = (char*)malloc(strlen(channel_name_org) + 1);

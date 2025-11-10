@@ -763,8 +763,7 @@ STATUS lookForSslCert(PSampleConfiguration* ppSampleConfiguration)
     PSampleConfiguration pSampleConfiguration = *ppSampleConfiguration;
 
     MEMSET(certName, 0x0, ARRAY_SIZE(certName));
-    // pSampleConfiguration->pCaCertPath = GETENV(CACERT_PATH_ENV_VAR);
-    pSampleConfiguration->pCaCertPath = "/root/copilot/cfg/cert.pem";
+    pSampleConfiguration->pCaCertPath = GETENV(CACERT_PATH_ENV_VAR);
 
     // if ca cert path is not set from the environment, try to use the one that cmake detected
     if (pSampleConfiguration->pCaCertPath == NULL) {
@@ -847,7 +846,7 @@ STATUS createSampleConfiguration(PCHAR channelName, SIGNALING_CHANNEL_ROLE_TYPE 
         }
     }
 
-    if ((pSampleConfiguration->channelInfo.pRegion = "ap-northeast-2") == NULL) {
+    if ((pSampleConfiguration->channelInfo.pRegion = GETENV(DEFAULT_REGION_ENV_VAR)) == NULL) {
         pSampleConfiguration->channelInfo.pRegion = DEFAULT_AWS_REGION;
     }
 
