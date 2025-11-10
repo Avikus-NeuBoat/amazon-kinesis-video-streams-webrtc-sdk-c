@@ -28,7 +28,10 @@ include_directories(
 )
 
 # === Library search paths ===
-link_directories(${KVS_SDK_ROOT}/lib ${KVS_SDK_ROOT}/open-source/lib)
+link_directories(
+    ${KVS_SDK_ROOT}/lib
+    ${KVS_LIB_PATH}
+    )
 
 # === GStreamer ===
 find_package(PkgConfig REQUIRED)
@@ -42,6 +45,7 @@ add_executable(kvs_service ${KVS_SAMPLE_SRC})
 
 # === Link libraries ===
 target_link_libraries(kvs_service
+    PRIVATE
     kvsWebrtcClient
     kvsWebrtcSignalingClient
     kvsCommonLws
@@ -65,7 +69,7 @@ target_include_directories(kvs_service
 # === RPATH setting ===
 # Ensures the binary looks for .so files inside /root/copilot/lib/kvs at runtime
 set_target_properties(kvs_service PROPERTIES
-    BUILD_RPATH "${CMAKE_LIB_PATH}/kvs"
+    BUILD_RPATH "${KVS_LIB_PATH}"
     INSTALL_RPATH "${KVS_LIB_PATH}"
     INSTALL_RPATH_USE_LINK_PATH TRUE
 )
@@ -77,13 +81,19 @@ install(TARGETS ${PROJECT_NAME}
 
 # === Install libraries ===
 file(GLOB KVS_SO_FILES
-    "${KVS_SDK_ROOT}/lib/libkvs*.so*"
-    "${KVS_SDK_ROOT}/open-source/lib/libkvs*.so*"
-    "${KVS_SDK_ROOT}/lib/libwebsockets*"
+    "${KVS_SDK_ROOT}/lib/*.so*"
+    # "${KVS_SDK_ROOT}/open-source/lib/libkvs*.so*"
+)
+
+file (GLOB KVS_WEBSOCKET
+    "${KVS_SDK_ROOT}/lib/libwebsockets.so*"
 )
 
 install(FILES ${KVS_SO_FILES}
         DESTINATION ${CMAKE_LIB_PATH}/kvs)
+
+install(FILES ${KVS_WEBSOCKET}
+        DESTINATION ${CMAKE_LIB_PATH})
 
 install(FILES  ${KVS_CERT_PATH}
         DESTINATION ${CMAKE_CFG_PATH})

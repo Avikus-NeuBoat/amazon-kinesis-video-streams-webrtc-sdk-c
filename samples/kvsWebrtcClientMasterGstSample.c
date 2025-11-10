@@ -316,6 +316,22 @@ void load_env_file(const char *path)
     fclose(fp);
 }
 
+int is_process_running(const char *name)
+{
+    char cmd[128];
+    snprintf(cmd, sizeof(cmd), "pgrep -x %s > /dev/null", name);
+    int ret = system(cmd);
+
+    if (ret == 0) // If found process
+    {
+        return 0;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
 INT32 main(INT32 argc, CHAR* argv[])
 {
     load_env_file(env_path);
@@ -344,8 +360,29 @@ INT32 main(INT32 argc, CHAR* argv[])
     /* Convert to encrypted password */
     /* Apply channel name automatically */
     pChannelName = (char*)malloc(strlen(channel_name_org) + 1);
-    strcpy(pChannelName, channel_name_org);// should be changed encrypted one
+    strcpy(pChannelName, channel_name);// should be changed encrypted one
     /* Apply channel name automatically */
+
+    BOOL ready = FALSE;
+
+    int ams_run = -1;
+    int go2rtc_run = -1;
+
+    while (!ready)
+    {
+        ams_run = is_process_running("ams");
+        go2rtc_run = is_process_running("go2rtc");
+        if (ams_run == 0 && go2rtc_run == 0)
+        {
+            ready = TRUE;
+            break;
+        }
+        else
+        {
+            g_usleep(1000 * 1000); // 1000ms
+        }
+    }
+
 
     CHK_STATUS(createSampleConfiguration(pChannelName, SIGNALING_CHANNEL_ROLE_TYPE_MASTER, TRUE, TRUE, logLevel, &pSampleConfiguration));
 
@@ -375,23 +412,31 @@ INT32 main(INT32 argc, CHAR* argv[])
     CHK_STATUS(sessionCleanupWait(pSampleConfiguration));
     // DLOGI("[KVS GStreamer Master] Streaming session terminated");
 
-    // Clean termination -- develop
-    // uint32_t i = 0;
-    // while(1)
-    // {
-    //     printf("Thread time %d\n",i);
-    //     sleep(1);
-    //     i++;
-    //     if (i > 15)
-    //     {
-    //         break;
-    //     }
-    // }
-    
-    free(pChannelName);
-    free(pSampleConfiguration->rtspUri);
-    // ATOMIC_STORE_BOOL(&pSampleConfiguration->appTerminateFlag, TRUE);
-    // goto CleanUp;
+    /* Clean termination */
+    while (ready)
+    {
+        ams_run = is_process_running("ams");
+        go2rtc_run = is_process_running("go2rtc");
+
+        if (ams_run != 0 || go2rtc_run != 0)
+        {
+            ready = FALSE;
+            break;
+        }
+        else
+        {
+            g_usleep(1000 * 1000); // 1000ms
+        }
+    }
+
+    if (ready == FALSE)
+    {
+        free(pChannelName);
+        free(pSampleConfiguration->rtspUri);
+        ATOMIC_STORE_BOOL(&pSampleConfiguration->appTerminateFlag, TRUE);
+        goto CleanUp;
+    }
+    /* Clean termination */
 
 CleanUp:
 
