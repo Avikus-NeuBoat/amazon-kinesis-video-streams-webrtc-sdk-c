@@ -423,12 +423,12 @@ INT32 main(INT32 argc, CHAR* argv[])
     char channel_name_org[64] = "coras-cctv";
     char channel_name[64] = {0};
     encrypt_serial(device_sn, channel_name);
-    printf("Channel name %s\n", channel_name); // this should be the channel name
+    // printf("Channel name %s\n", channel_name); // this should be the channel name
     /* Convert to encrypted password */
     /* Apply channel name automatically */
-    pChannelName = (char*) malloc(strlen(channel_name_org) + 1);
+    pChannelName = (char*) malloc(strlen(channel_name_org) + 1); // should be changed encrypted one
     strcpy(pChannelName, channel_name_org); // should be changed encrypted one
-    printf("Channel name open %s\n", pChannelName);
+    // printf("Channel name open %s\n", pChannelName);
     /* Apply channel name automatically */
 
     BOOL ready = FALSE;
