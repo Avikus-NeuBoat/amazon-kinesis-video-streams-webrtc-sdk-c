@@ -4,8 +4,8 @@ project(kvs_service C)
 set(CMAKE_C_STANDARD 99)
 
 # === Paths ===
-set(KVS_SDK_ROOT ${CMAKE_SOURCE_DIR}/APP/aws)
-set(KVS_CERT_PATH ${CMAKE_SOURCE_DIR}/APP/aws/certs/cert.pem)
+set(KVS_SDK_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(KVS_CERT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/certs/cert.pem)
 set(KVS_LIB_PATH /root/copilot/lib/kvs)       # Final install location for .so files
 
 # === Sources ===
