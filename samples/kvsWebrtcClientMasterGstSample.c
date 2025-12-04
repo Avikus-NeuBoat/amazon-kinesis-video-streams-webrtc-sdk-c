@@ -426,8 +426,8 @@ INT32 main(INT32 argc, CHAR* argv[])
     // printf("Channel name %s\n", channel_name); // this should be the channel name
     /* Convert to encrypted password */
     /* Apply channel name automatically */
-    pChannelName = (char*) malloc(strlen(channel_name_org) + 1); // should be changed encrypted one
-    strcpy(pChannelName, channel_name_org); // should be changed encrypted one
+    pChannelName = (char*) malloc(strlen(channel_name) + 1); // should be changed encrypted one
+    strcpy(pChannelName, channel_name); // should be changed encrypted one
     // printf("Channel name open %s\n", pChannelName);
     /* Apply channel name automatically */
 
