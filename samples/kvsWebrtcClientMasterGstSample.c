@@ -91,6 +91,7 @@ GstFlowReturn on_new_sample(GstElement* sink, gpointer data, UINT64 trackid)
                             g_object_set(G_OBJECT(encoder), "bitrate", bitrate, NULL);
                         }
                         MUTEX_UNLOCK(pSampleStreamingSession->twccMetadata.updateLock);
+                        gst_object_unref(encoder);
                     }
                 }
                 pRtcRtpTransceiver = pSampleStreamingSession->pAudioRtcRtpTransceiver;
@@ -115,6 +116,7 @@ GstFlowReturn on_new_sample(GstElement* sink, gpointer data, UINT64 trackid)
                             g_object_set(G_OBJECT(encoder), "bitrate", bitrate, NULL);
                         }
                         MUTEX_UNLOCK(pSampleStreamingSession->twccMetadata.updateLock);
+                        gst_object_unref(encoder);
                     }
                 }
                 pRtcRtpTransceiver = pSampleStreamingSession->pVideoRtcRtpTransceiver;
@@ -280,6 +282,9 @@ int get_sn_from_shm_cfg(const char* p_sn, int sn_buf_sz)
     (void) memset(p_sn, 0, sn_buf_sz);
     (void) memcpy(p_sn, pSHM_CFG->por_cfg.device_sn, INI_STRING_LEN);
 
+    // 3. detach shared memory
+    shmdt(shm);
+
     // n.
     return 0;
 }
@@ -339,10 +344,15 @@ void load_env_file(const char* path)
         char* value = eq + 1;
 
         // Optional: remove surrounding quotes
-        if (*value == '\'' || *value == '"')
+        size_t vlen = strlen(value);
+        if (vlen >= 2 && (*value == '\'' || *value == '"'))
         {
-            value++;
-            value[strlen(value) - 1] = '\0';
+            char quote = *value;
+            if (value[vlen - 1] == quote)
+            {
+                value++;
+                value[vlen - 2] = '\0';
+            }
         }
 
         // Export it to environment
@@ -405,7 +415,7 @@ INT32 main(INT32 argc, CHAR* argv[])
 
     STATUS retStatus = STATUS_SUCCESS;
     PSampleConfiguration pSampleConfiguration = NULL;
-    PCHAR pChannelName;
+    PCHAR pChannelName = NULL;
     RTC_CODEC audioCodec = RTC_CODEC_OPUS;
     RTC_CODEC videoCodec = RTC_CODEC_H264_PROFILE_42E01F_LEVEL_ASYMMETRY_ALLOWED_PACKETIZATION_MODE;
 
@@ -479,11 +489,13 @@ INT32 main(INT32 argc, CHAR* argv[])
     FILE *fp = fopen(encrypt_file_path, "w");
     if (fp == NULL)
     {
-        perror("Cannot open txt file\n");
+        perror("Cannot open txt file");
     }
-    fprintf(fp, "%s\n", pChannelName);
-
-    fclose(fp);
+    else
+    {
+        fprintf(fp, "%s\n", pChannelName);
+        fclose(fp);
+    }
     /* Make kvs file in dat/kvs */
 
     /* Initialize GStreamer */
@@ -615,12 +627,6 @@ INT32 main(INT32 argc, CHAR* argv[])
         }
     }
 
-    if (ready == FALSE)
-    {
-        free(pChannelName);
-        free(pSampleConfiguration->rtspUri);
-        goto CleanUp;
-    }
     /* Clean termination */
 
 CleanUp:
@@ -642,14 +648,14 @@ CleanUp:
             THREAD_JOIN(pSampleConfiguration->mediaSenderTid, NULL);
         }
 
-        // if (pSampleConfiguration->enableFileLogging) {
-        //     freeFileLogger();
-        // }
         retStatus = freeSignalingClient(&pSampleConfiguration->signalingClientHandle);
         if (retStatus != STATUS_SUCCESS)
         {
             DLOGE("[KVS GStreamer Master] freeSignalingClient(): operation returned status code: 0x%08x", retStatus);
         }
+
+        free(pSampleConfiguration->rtspUri);
+        pSampleConfiguration->rtspUri = NULL;
 
         retStatus = freeSampleConfiguration(&pSampleConfiguration);
         if (retStatus != STATUS_SUCCESS)
@@ -657,6 +663,10 @@ CleanUp:
             DLOGE("[KVS GStreamer Master] freeSampleConfiguration(): operation returned status code: 0x%08x", retStatus);
         }
     }
+
+    free(pChannelName);
+    pChannelName = NULL;
+
     DLOGI("[KVS Gstreamer Master] Cleanup done");
 
     RESET_INSTRUMENTED_ALLOCATORS();
