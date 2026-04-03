@@ -444,13 +444,11 @@ INT32 main(INT32 argc, CHAR* argv[])
     BOOL ready = FALSE;
 
     int ams_run = -1;
-    int go2rtc_run = -1;
 
     while (!ready)
     {
         ams_run = is_process_running("ams");
-        go2rtc_run = is_process_running("go2rtc");
-        if (ams_run == 0 && go2rtc_run == 0)
+        if (ams_run == 0)
         {
             ready = TRUE;
             break;
@@ -469,7 +467,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     pSampleConfiguration->audioCodec = audioCodec;
     pSampleConfiguration->videoCodec = videoCodec;
 
-    char rtsp_address[64] = "rtsp://127.0.0.1:8588/camera0";
+    char rtsp_address[64] = "rtsp://127.0.0.1:8554/test";
     pSampleConfiguration->rtspUri = (char*) malloc(strlen(rtsp_address) + 1);
     strcpy(pSampleConfiguration->rtspUri, rtsp_address);
     pSampleConfiguration->videoSource = sendGstreamerAudioVideo;
@@ -524,8 +522,7 @@ INT32 main(INT32 argc, CHAR* argv[])
     while (ready)
     {
         ams_run = is_process_running("ams");
-        go2rtc_run = is_process_running("go2rtc");
-        if (ams_run != 0 || go2rtc_run != 0)
+        if (ams_run != 0)
         {
             ready = FALSE;
             if (sampleConfigurationObjLockLocked)
